@@ -36,6 +36,7 @@ struct ThumbImage: View {
   let file: ImageFile
   @State var image = UIImage()
   @State var overlay = ""
+	@EnvironmentObject var imageLoader: ImageLoader
 
   @MainActor func updateImage(_ image: UIImage) {
     self.image = image
@@ -51,5 +52,12 @@ struct ThumbImage: View {
           Image(systemName: overlay)
         }
       }
+			.task {
+				guard let image = try? await imageLoader.image(file.url) else {
+					overlay = "camera.metering.unknown"
+					return
+				}
+				updateImage(image)
+			}
   }
 }
